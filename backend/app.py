@@ -367,6 +367,14 @@ def fallback_analysis(repo_summary, file_analysis, commit_analysis, readme_analy
             "isAIGenerated": False
         }
 
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({
+        'status': 'online',
+        'message': 'GitGrade Backend is running',
+        'groq_available': groq_client is not None
+    })
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({
@@ -454,7 +462,7 @@ Make roadmap SPECIFIC to what's actually missing in THIS repository. Also provid
                         # Clean the response - remove code blocks and extra text
                         cleaned_response = ai_response_text.strip()
                         
-                        # Remove markdown code blocks if present
+                        # Remove code blocks if present
                         if cleaned_response.startswith('```json'):
                             cleaned_response = cleaned_response.replace('```json', '').replace('```', '').strip()
                         elif cleaned_response.startswith('```'):
@@ -513,7 +521,10 @@ if __name__ == '__main__':
     print(f"🤖 Groq Client: {'✅ Ready' if groq_client else '❌ Not Available'}")
     if not groq_client:
         print("💡 To enable AI analysis, set GROQ_API_KEY in .env file")
-    print("📡 Server: http://localhost:5000")
+    
+    # Get port from environment variable or default to 5000
+    port = int(os.environ.get('PORT', 5000))
+    print(f"📡 Server: http://0.0.0.0:{port}")
     print("🔄 Press Ctrl+C to stop")
     print("=" * 50)
-    app.run(debug=True, port=5000)
+    app.run(debug=False, port=port, host='0.0.0.0')
