@@ -518,6 +518,14 @@ Make roadmap SPECIFIC to what's actually missing in THIS repository. Also provid
 if __name__ == '__main__':
     print("🎯 GitGrade AI Backend Starting...")
     print("=" * 50)
+    
+    # Debug: Print environment variables
+    import os
+    groq_key = os.environ.get('GROQ_API_KEY')
+    print(f"🔑 GROQ_API_KEY present: {'✅ Yes' if groq_key else '❌ No'}")
+    if groq_key:
+        print(f"🔑 Key length: {len(groq_key)} characters")
+    
     print(f"🤖 Groq Client: {'✅ Ready' if groq_client else '❌ Not Available'}")
     if not groq_client:
         print("💡 To enable AI analysis, set GROQ_API_KEY in .env file")
