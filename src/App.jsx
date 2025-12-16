@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Star, GitFork, Eye, Calendar, FileText, Folder, File, AlertCircle, Award, Target, CheckCircle, TrendingUp, Code, Layers, ChevronRight, ChevronDown } from 'lucide-react';
+import { Search, Star, GitFork, Eye, Calendar, FileText, Folder, File, AlertCircle, Award, Target, CheckCircle, TrendingUp, Code, Layers, ChevronRight, ChevronDown, Users, Shield, ShieldCheck } from 'lucide-react';
 
 export default function GitGrader() {
   const [repoUrl, setRepoUrl] = useState('');
@@ -305,34 +305,159 @@ export default function GitGrader() {
       summary += `This project has potential but requires significant improvements to meet industry standards.`;
     }
 
-    const roadmap = [
-      'Improve README with comprehensive project documentation and setup instructions',
-      'Add comprehensive test coverage with unit and integration tests',
-      'Set up CI/CD pipeline using GitHub Actions for automated testing and deployment',
-      'Add code linting and formatting tools (ESLint, Prettier) for consistent code style',
-      'Implement proper error handling and logging throughout the application'
-    ];
+    // Generate specific roadmap based on actual repository analysis
+    const roadmap = [];
 
-    // Add specific improvements based on analysis
-    if (analysis.documentation < 15) {
-      roadmap.push('Create detailed API documentation and usage examples');
-    }
-    if (analysis.structure < 15) {
-      roadmap.push('Organize code into proper folder structure (src/, tests/, docs/)');
-    }
-    if (analysis.bestPractices < 10) {
-      roadmap.push('Add .gitignore file and LICENSE for better project management');
-    }
-    if (analysis.codeQuality < 20) {
-      roadmap.push('Refactor code for better maintainability and readability');
-    }
-    if (analysis.activity < 15) {
-      roadmap.push('Establish consistent commit patterns and branching strategy');
+    // 1. Documentation-specific improvements
+    if (!readme || readme === 'No README found') {
+      roadmap.push(`Create a comprehensive README.md explaining what this ${repoInfo.language || 'project'} does`);
+    } else if (readme.length < 300) {
+      roadmap.push(`Expand the README to better describe this ${repoInfo.language || 'project'} purpose and features`);
     }
 
-    if (score >= 70) {
-      roadmap.push('Add performance monitoring and optimization');
-      roadmap.push('Consider contributing to open-source community');
+    if (readme && readme.toLowerCase().includes('install') === false) {
+      roadmap.push(`Add installation and setup instructions for this ${repoInfo.language || 'project'}`);
+    }
+
+    if (readme && (readme.toLowerCase().includes('usage') === false && readme.toLowerCase().includes('how to use') === false)) {
+      roadmap.push(`Include usage examples and code snippets in the ${repoInfo.language || 'project'} documentation`);
+    }
+
+    // 2. Testing-specific improvements
+    const testFiles = files.filter(f =>
+      /test|spec|__tests__/i.test(f.path) ||
+      /\.(test|spec)\.(js|jsx|ts|tsx|py)$/i.test(f.path)
+    );
+
+    if (testFiles.length === 0) {
+      if (repoInfo.language === 'JavaScript') {
+        roadmap.push("Add unit tests using Jest or Mocha for JavaScript modules");
+      } else if (repoInfo.language === 'Python') {
+        roadmap.push("Implement unit tests using pytest or unittest for Python functions");
+      } else if (repoInfo.language === 'Java') {
+        roadmap.push("Add JUnit tests for Java classes and methods");
+      } else {
+        roadmap.push(`Implement unit tests for ${repoInfo.language || 'code'} modules`);
+      }
+    } else if (testFiles.length < codeFiles.length * 0.3) {
+      roadmap.push(`Increase test coverage - currently only ${testFiles.length} test files for ${codeFiles.length} code files`);
+    }
+
+    // 3. Structure-specific improvements
+    const hasSourceFolder = files.some(f => /^(src|lib|app|source)/i.test(f.path));
+    if (!hasSourceFolder && codeFiles.length > 3) {
+      if (repoInfo.language === 'JavaScript') {
+        roadmap.push("Organize JavaScript files into src/ and lib/ directories");
+      } else if (repoInfo.language === 'Python') {
+        roadmap.push("Structure Python code into packages with proper __init__.py files");
+      } else {
+        roadmap.push(`Organize ${repoInfo.language || 'code'} into proper directory structure`);
+      }
+    }
+
+    // 4. CI/CD specific improvements
+    const hasCICDWorkflow = files.some(f =>
+      f.path.startsWith('.github/workflows/') ||
+      f.path === '.travis.yml' ||
+      f.path === 'Jenkinsfile'
+    );
+    if (!hasCICDWorkflow) {
+      if (repoInfo.language === 'JavaScript') {
+        roadmap.push("Set up GitHub Actions for Node.js testing and deployment");
+      } else if (repoInfo.language === 'Python') {
+        roadmap.push("Configure GitHub Actions for Python testing with pytest");
+      } else if (repoInfo.language === 'Java') {
+        roadmap.push("Add GitHub Actions workflow for Maven/Gradle builds");
+      } else {
+        roadmap.push(`Set up CI/CD pipeline for ${repoInfo.language || 'project'} automation`);
+      }
+    }
+
+    // 5. Language-specific tooling
+    const hasLintingConfig = files.some(f =>
+      /^(\.eslintrc|\.prettierrc|pyproject\.toml|\.flake8)/.test(f.path)
+    );
+    if (!hasLintingConfig) {
+      if (repoInfo.language === 'JavaScript') {
+        roadmap.push("Add ESLint and Prettier for JavaScript code quality");
+      } else if (repoInfo.language === 'Python') {
+        roadmap.push("Set up Black, flake8, and mypy for Python code quality");
+      } else if (repoInfo.language === 'Java') {
+        roadmap.push("Configure Checkstyle and SpotBugs for Java code analysis");
+      } else {
+        roadmap.push(`Add linting and formatting tools for ${repoInfo.language || 'code'}`);
+      }
+    }
+
+    // 6. Commit and collaboration improvements
+    if (commits.length > 0) {
+      const avgCommitLength = commits.reduce((sum, c) => sum + c.commit.message.length, 0) / commits.length;
+      if (avgCommitLength < 20) {
+        roadmap.push(`Improve commit messages - current average is only ${Math.round(avgCommitLength)} characters`);
+      }
+    }
+
+    // 7. Repository-specific missing files
+    const hasGitIgnoreFile = files.some(f => f.path === '.gitignore');
+    const hasLicenseFile = files.some(f => /^LICENSE/i.test(f.path));
+    
+    if (!hasGitIgnoreFile) {
+      roadmap.push("Add .gitignore file to exclude unnecessary files from version control");
+    }
+    
+    if (!hasLicenseFile) {
+      roadmap.push("Add LICENSE file to specify usage rights for the project");
+    }
+
+    // Ensure we have exactly 5 items
+    if (roadmap.length < 5) {
+      // Add repository-specific items based on actual findings
+      let missingItemsNeeded = 5 - roadmap.length;
+      
+      // Add items based on what's actually missing
+      if (!hasSourceFolder) {
+        roadmap.push("Create a proper directory structure with src/ and tests/ folders for better organization");
+      }
+      
+      if (commits.length > 0 && [...new Set(commits.map(c => c.commit.author.name))].length <= 1) {
+        roadmap.push("Encourage collaboration by inviting other contributors to the project");
+      }
+      
+      const hasDocsFolder = files.some(f => /^(docs|documentation|wiki)/i.test(f.path));
+      if (!hasDocsFolder) {
+        roadmap.push("Add a docs/ folder with project documentation for the codebase");
+      }
+      
+      const readmeBadges = readme && (readme.includes('![') || readme.includes('https://img.shields.io'));
+      if (readme && !readmeBadges) {
+        roadmap.push("Add badges to README showing build status, dependencies, and code coverage");
+      }
+      
+      if (!hasLintingConfig && roadmap.length < 5) {
+        roadmap.push("Add a linter configuration file for consistent code formatting");
+      }
+      
+      // Fill remaining slots with more specific items
+      while (roadmap.length < 5 && missingItemsNeeded > 0) {
+        const additionalItems = [
+          "Add comprehensive error handling in critical functions",
+          "Implement logging for better debugging in the application",
+          "Add contribution guidelines to encourage community involvement",
+          "Set up automated code review checks for pull requests"
+        ];
+        // Add items that haven't been added yet
+        for (const item of additionalItems) {
+          if (!roadmap.includes(item) && roadmap.length < 5) {
+            roadmap.push(item);
+          }
+        }
+        missingItemsNeeded -= 1;
+      }
+    }
+    
+    // Limit to exactly 5 items
+    if (roadmap.length > 5) {
+      roadmap.length = 5;
     }
 
     return {
@@ -343,7 +468,7 @@ export default function GitGrader() {
       projectDescription: repoInfo.description || `This ${repoInfo.language || 'software'} project appears to be a development repository. The project structure suggests it's designed for ${detectedTechStack.length > 0 ? detectedTechStack.join(', ') + ' development' : 'general software development'}. More specific details about the project's purpose and functionality would be available with a comprehensive README file.`,
       techStackAnalysis: `This project utilizes ${repoInfo.language || 'multiple technologies'} as the primary language${detectedTechStack.length > 1 ? `, along with ${detectedTechStack.slice(1).join(', ')}` : ''}. The technology stack appears ${detectedTechStack.length > 2 ? 'diverse and well-rounded' : 'focused and appropriate'} for the project's scope and requirements.`,
       feedback: `Based on repository structure analysis: The project shows ${analysis.codeQuality >= 15 ? 'good' : 'basic'} code organization, ${analysis.documentation >= 10 ? 'adequate' : 'limited'} documentation, and ${analysis.bestPractices >= 8 ? 'follows several' : 'lacks many'} development best practices. ${analysis.structure >= 15 ? 'The project structure is well-organized.' : 'Consider improving the project structure.'} For more detailed AI-powered feedback, set up a Groq API key.`,
-      roadmap: roadmap.slice(0, Math.max(5, roadmap.length)),
+      roadmap: roadmap,
       breakdown: analysis,
       isAIGenerated: false,
       techStack: detectedTechStack
@@ -614,7 +739,7 @@ export default function GitGrader() {
 
             <div className="border-b border-gray-200">
               <div className="flex gap-1 p-2">
-                {['grade', 'overview', 'commits', 'files', 'readme'].map(tab => (
+                {['grade', 'overview', 'commits', 'files', 'readme', 'security', 'collaborators'].map(tab => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -822,6 +947,59 @@ export default function GitGrader() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Security Vulnerability Assessment */}
+                  {gradeData.securityVulnerabilities && gradeData.securityVulnerabilities.length > 0 && (
+                    <div className="p-6 bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 rounded-xl border border-red-200 shadow-sm">
+                      <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                        <div className="p-2 bg-red-100 rounded-lg">
+                          <AlertCircle className="w-5 h-5 text-red-600" />
+                        </div>
+                        Security Vulnerability Assessment
+                      </h3>
+                      <div className="space-y-3">
+                        {gradeData.securityVulnerabilities.map((vulnerability, idx) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 bg-white/70 backdrop-blur-sm rounded-lg border border-red-100 hover:shadow-sm transition-shadow">
+                            <div className="mt-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-xs font-bold">!</span>
+                            </div>
+                            <span className="text-gray-800 font-medium">{vulnerability}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Collaborators */}
+                  {commits && commits.length > 0 && (
+                    <div className="p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl border border-blue-200 shadow-sm">
+                      <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Users className="w-5 h-5 text-blue-600" />
+                        </div>
+                        Collaborators ({[...new Set(commits.map(c => c.commit.author.name))].length})
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[...new Set(commits.map(c => c.commit.author.name))].map((author, idx) => {
+                          const authorCommits = commits.filter(c => c.commit.author.name === author);
+                          return (
+                            <div key={idx} className="flex items-center gap-4 p-4 bg-white/70 backdrop-blur-sm rounded-lg border border-blue-100 hover:shadow-sm transition-shadow">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                                {author.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-semibold text-gray-800">{author}</div>
+                                <div className="text-sm text-gray-600">{authorCommits.length} commit{authorCommits.length !== 1 ? 's' : ''}</div>
+                              </div>
+                              <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                {authorCommits.length}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -895,6 +1073,108 @@ export default function GitGrader() {
                     <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800 max-h-96 overflow-y-auto">
                       {readme}
                     </pre>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'security' && gradeData && gradeData.securityVulnerabilities && (
+                <div className="space-y-6">
+                  <div className="p-6 bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 rounded-xl border border-red-200 shadow-sm">
+                    <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                      <div className="p-3 bg-red-100 rounded-lg">
+                        <Shield className="w-6 h-6 text-red-600" />
+                      </div>
+                      Security Vulnerability Assessment
+                    </h3>
+                    <p className="text-gray-700 mb-6">
+                      Analysis of potential security vulnerabilities in this repository based on code structure and best practices.
+                    </p>
+                    
+                    {gradeData.securityVulnerabilities.length > 0 ? (
+                      <div className="space-y-4">
+                        {gradeData.securityVulnerabilities.map((vulnerability, idx) => (
+                          <div key={idx} className="flex items-start gap-4 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-red-100 hover:shadow-md transition-shadow">
+                            <div className="mt-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-xs font-bold">!</span>
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-gray-800 font-medium">{vulnerability}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-6 bg-green-50 rounded-xl border border-green-200 text-center">
+                        <div className="flex justify-center mb-3">
+                          <ShieldCheck className="w-12 h-12 text-green-600" />
+                        </div>
+                        <h4 className="text-xl font-semibold text-green-800 mb-2">No Security Issues Detected</h4>
+                        <p className="text-green-700">
+                          This repository appears to follow good security practices based on our analysis.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'collaborators' && commits && commits.length > 0 && (
+                <div className="space-y-6">
+                  <div className="p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl border border-blue-200 shadow-sm">
+                    <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                      <div className="p-3 bg-blue-100 rounded-lg">
+                        <Users className="w-6 h-6 text-blue-600" />
+                      </div>
+                      Repository Collaborators
+                    </h3>
+                    <p className="text-gray-700 mb-6">
+                      Contributors to this repository and their commit statistics.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {[...new Set(commits.map(c => c.commit.author.name))].map((author, idx) => {
+                        const authorCommits = commits.filter(c => c.commit.author.name === author);
+                        const firstCommit = authorCommits[authorCommits.length - 1];
+                        const lastCommit = authorCommits[0];
+                        
+                        return (
+                          <div key={idx} className="flex flex-col p-5 bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
+                            <div className="flex items-center gap-4 mb-4">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                {author.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-bold text-gray-800 text-lg">{author}</div>
+                                <div className="text-sm text-gray-600">
+                                  {formatDate(firstCommit.commit.author.date)}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Total Commits:</span>
+                                <span className="font-semibold text-blue-600">{authorCommits.length}</span>
+                              </div>
+                              
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">First Commit:</span>
+                                <span className="text-sm text-gray-600">
+                                  {formatDate(firstCommit.commit.author.date).split(',')[0]}
+                                </span>
+                              </div>
+                              
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Last Commit:</span>
+                                <span className="text-sm text-gray-600">
+                                  {formatDate(lastCommit.commit.author.date).split(',')[0]}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
