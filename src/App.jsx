@@ -19,7 +19,8 @@ export default function GitGrader() {
   React.useEffect(() => {
     const checkBackendStatus = async () => {
       try {
-        const response = await fetch('http://localhost:5000/health');
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+        const response = await fetch(`${baseUrl}/health`);
         if (response.ok) {
           setBackendStatus('online');
         } else {
@@ -138,7 +139,8 @@ export default function GitGrader() {
       };
 
       // Call our Python backend service that uses Groq SDK
-      const response = await fetch('http://localhost:5000/analyze-repository', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const response = await fetch(`${baseUrl}/analyze-repository`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
