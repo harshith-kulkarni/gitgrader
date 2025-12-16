@@ -3,7 +3,7 @@
 An intelligent system that evaluates GitHub repositories using **Groq AI** and provides meaningful scores, summaries, and personalized roadmaps for developers.
 
 
-## Deployment link :  
+## Deployment link :  https://gitgrader.vercel.app/
 
 ## 🎯 Problem Statement
 
@@ -90,6 +90,8 @@ Navigate to `http://localhost:5173` in your browser.
    - Repository structure visualization
    - Technology stack analysis
    - AI-generated summary and feedback
+   - Repository Collaborators
+   - Security Vulnerability Assessment
    - Personalized improvement roadmap
 
 ## 🛠️ Technical Implementation
@@ -150,6 +152,8 @@ gitgrade/
 - **Tech Stack Badges**: Visual representation of technologies used
 - **Roadmap Cards**: Numbered improvement suggestions
 - **Status Indicators**: Real-time backend connection status
+- **Repository Collaborators**: Check info of collaborators of repo
+- **Security Vulnerability Assessment**: Check for vulnerabilities like exposed API's , e.t.c
 
 ## 🔧 Configuration
 
@@ -191,74 +195,7 @@ Repository: https://github.com/facebook/react
 
 ## 🚀 Deployment
 
-### Backend Deployment Options
-
-Since this application has a Python Flask backend and a React frontend, you'll need to deploy them separately:
-
-#### Option 1: Deploy Backend to Railway (Recommended)
-1. Create an account at [railway.app](https://railway.app)
-2. Create a new project and connect your GitHub repository
-3. Set the root directory to `/backend`
-4. Add the following environment variables in Railway:
-   ```
-   GROQ_API_KEY=your_actual_api_key_here
-   ```
-5. Railway will automatically detect and deploy your Flask app
-
-#### Option 2: Deploy Backend to Render
-1. Create an account at [render.com](https://render.com)
-2. Create a new Web Service
-3. Connect your GitHub repository
-4. Set the root directory to `/backend`
-5. Set the build command to:
-   ```bash
-   pip install -r requirements.txt
-   ```
-6. Set the start command to:
-   ```bash
-   python app.py
-   ```
-7. Add the environment variable:
-   ```
-   GROQ_API_KEY=your_actual_api_key_here
-   ```
-
-### Frontend Deployment to Vercel
-
-1. Create an account at [vercel.com](https://vercel.com)
-2. Create a new project and connect your GitHub repository
-3. Set the root directory to `/` (project root)
-4. Set the build command to:
-   ```bash
-   npm run build
-   ```
-5. Set the output directory to:
-   ```
-   dist
-   ```
-6. Add the environment variable:
-   ```
-   VITE_API_BASE_URL=https://your-backend-url.com
-   ```
-   (Replace with your actual backend URL from Railway/Render)
-
-### Environment Variables
-
-Backend (.env in backend directory):
-```
-GROQ_API_KEY=your_actual_api_key_here
-```
-
-Frontend (.env in root directory):
-```
-VITE_API_BASE_URL=http://localhost:5000
-```
-
-Frontend (.env.production in root directory):
-```
-VITE_API_BASE_URL=https://your-deployed-backend-url.com
-```
-
-## deployment link : https://gitgrader.vercel.app/
+### Backend : railway
+### Frontend : vercel
 
 ---
